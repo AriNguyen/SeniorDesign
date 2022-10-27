@@ -10,7 +10,7 @@ https://andysbrainbook.readthedocs.io/en/latest/MRtrix/MRtrix_Course/MRtrix_03_D
 mrconvert dwi.nii.gz dwi_raw.mif -fslgrad dwi.bvec dwi.bval
 ```
 
-![](img/dwi_raw.png)
+<img src="img/dwi_raw.png" width="250">
 
 ## 2. Denoising
 ```console
