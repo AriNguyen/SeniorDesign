@@ -47,7 +47,7 @@ In BATMAN tutorial, ``-rpe_pair`` is used but here we're using ``-rpe_none`` bec
 More information about these keywords can be found [here](https://mrtrix.readthedocs.io/en/3.0_rc1/reference/scripts/dwipreproc.html)
 
 ```console
-dwifslpreproc dwi_den_unr.mif dwi_den_unr_preproc.mif -pe_dir AP -eddy_options " --slm=linear"
+dwifslpreproc dwi_den_unr.mif dwi_den_unr_preproc.mif -rpe_none -pe_dir AP -eddy_options " --slm=linear"
 ```
 
 **Current Problem:** 
