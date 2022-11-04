@@ -26,9 +26,9 @@ dwidenoise dwi_raw.mif dwi_den.mif –noise noise.mif
 mrcalc dwi_raw.mif dwi_den.mif –subtract residual.mif
 ```
 
-dwi_den.png            |  residual.png
-:---------------------:|:-------------------------:
-![](img/dwi_den.png)  |  !![](img/residual.png)
+dwi_den.png           |  residual.png
+:--------------------:|:-------------------------:
+![](img/dwi_den.png)  |  ![](img/residual.png)
 
 ### 2.3. Unringing
 Remove Gibb’s ringing artefacts:
@@ -43,7 +43,7 @@ mrcalc dwi_den.mif dwi_den_unr.mif –subtract residualUnringed.mif
 
 dwi_den_unr.png           |  residual_unr.png
 :------------------------:|:-------------------------:
-![](img/dwi_den_unr.png)  |  !![](img/residual_unr.png)
+![](img/dwi_den_unr.png)  |  ![](img/residual_unr.png)
 
 ### 2.4 Motion and distortion correction
 
