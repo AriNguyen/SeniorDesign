@@ -51,12 +51,15 @@ In BATMAN tutorial, ``-rpe_pair`` is used but here we're using ``-rpe_none`` bec
 
 More information about these keywords can be found [here](https://mrtrix.readthedocs.io/en/3.0_rc1/reference/scripts/dwipreproc.html)
 
+This command takes a few hour to run.
+
 ```console
 dwifslpreproc dwi_den_unr.mif dwi_den_unr_preproc.mif -rpe_none -pe_dir AP -eddy_options " --slm=linear"
 ```
 
 ### 2.5. Bias field correction
 
+Needs to run in docker 
 ```console
 dwibiascorrect ants dwi_den_unr_preproc.mif dwi_den_unr_preproc_unbiased.mif -bias bias.mif
 ```
@@ -105,34 +108,21 @@ mtnormalise wmfod.mif wmfod_norm.mif gmfod.mif gmfod_norm.mif csffod.mif csffod_
 
 ### 4.1. Preparing Anatomically Constrained Tractography (ACT)
 
-#### 4.1.1. Preparing a mask for streamline termination
-
-Converting T1 iamge from .nii.gz format to .mif
+Run these commands again for new protocol
 
 ```console
-mrconvert mprage.nii.gz T1_raw.mif
-```
-
-```console
-5ttgen fsl T1_raw.mif 5tt_nocoreg.mif
-```
-
-```console
-dwiextract dwi_den_unr_preproc_unbiased.mif - -bzero | mrmath - mean mean_b0_preprocessed.mif -axis 
+dwiextract dwi_den_unr_preproc_unbiased.mif - -bzero | mrmath - mean mean_b0_preprocessed.mif -axis 3
 
 mrconvert mean_b0_preprocessed.mif mean_b0_preprocessed.nii.gz
 
-mrconvert T1_raw.mif T1_raw.nii.gz
+flirt -in mean_b0_preprocessed.nii.gz -ref ../T1_raw.nii.gz -dof 6 -omat diff2struct_fsl.mat
 
-flirt -in mean_b0_preprocessed.nii.gz -ref T1_raw.nii.gz -dof 6 -omat diff2struct_fsl.mat
+transformconvert diff2struct_fsl.mat mean_b0_preprocessed.nii.gz ../T1_raw.mif flirt_import diff2struct_mrtrix.txt
 
-transformconvert diff2struct_fsl.mat mean_b0_preprocessed.nii.gz T1_raw.mif flirt_import diff2struct_mrtrix.txt
+mrtransform ../T1_raw.mif -linear diff2struct_mrtrix.txt -inverse T1_coreg.mif
 
-mrtransform T1_raw.mif -linear diff2struct_mrtrix.txt -inverse T1_coreg.mif
-
-mrtransform 5tt_nocoreg.mif -linear diff2struct_mrtrix.txt -inverse 5tt_coreg.mif
+mrtransform ../5tt_nocoreg.mif -linear diff2struct_mrtrix.txt -inverse 5tt_coreg.mif
 ```
-
 
 #### 4.1.2 Preparing a mask of streamline seeding
 ```console
@@ -140,17 +130,23 @@ mrtransform 5tt_nocoreg.mif -linear diff2struct_mrtrix.txt -inverse 5tt_coreg.mi
 ```
 
 ### 4.2 Creating streamlines
-Creating 10 million streamlines:
+
+
+Creating 10 million streamlines. This command will take hours to finish.
+
 ```console
 tckgen -act 5tt_coreg.mif -backtrack -seed_gmwmi gmwmSeed_coreg.mif -select 10000000 wmfod_norm.mif tracks_10mio.tck
 ```
 
+
 ### 4.3 Reducing the number of streamlines
+This command will take hours to finish.
 ```console
 tcksift –act 5tt_coreg.mif –term_number 1000000 tracks_10mio.tck wmfod_norm.mif sift_1mio.tck
 ```
 
 ### 4.4 Region-of-interest filtering of tractogramsc
+
 ```console
 tckedit –include -0.6,-16.5,-16.0,3 sift_1mio.tck cst.tck
 ```
@@ -165,7 +161,28 @@ tck2connectome -symmetric -zero_diagonal -scale_invnodevol sift_1mio.tck schaefe
 
 ### 5.3 Selecting connections of interest
 
-## 8. Preparing a parcellation image for structural connectivity analysis
+## Appendix. 
+
+## 6. Preparing a mask for streamline termination
+
+Converting T1 image from .nii.gz format to .mif. 
+
+You do not need to run these 2 commands again if you already did for other protocol:
+
+```console
+
+mrconvert mprage.nii.gz T1_raw.nii.gz
+
+mrconvert T1_raw.nii.gz T1_raw.mif
+```
+
+I have some problem with this on my local machine so have to transfer to docker container. 
+```console
+5ttgen fsl T1_raw.mif 5tt_nocoreg.mif
+```
+
+## 7. Preparing a parcellation image for structural connectivity analysis
+
 You need to install FreeSurfer
 
 ```console
@@ -173,43 +190,44 @@ export FREESURFER_HOME=/Applications/freesurfer/7.3.2
 source $FREESURFER_HOME/SetUpFreeSurfer.sh
 ```
 
-### 8.1 Convert the raw T1.mif image to nifti-format
+### 7.1 Convert the raw T1.mif image to nifti-format
 ```console
 mrconvert T1_raw.mif T1_raw.nii.gz
 ```
 
-### 8.2 Preprocess the T1 image in FreeSurfer
+### 7.2 Preprocess the T1 image in FreeSurfer
+This commands take a few hours to run.
 ```console
-recon-all –s brain –i T1_raw.nii.gz –all
+recon-all -s brain -i T1_raw.nii.gz -all
 ```
 
 ```console
 mri_surf2surf --hemi lh \                
 --srcsubject fsaverage \
 --trgsubject brain \
---sval-annot /Users/aringuyen/Downloads/Parcellations/FreeSurfer5.3/fsaverage/label/lh.Schaefer2018_200Parcels_17Networks_order.annot \
---tval $SUBJECTS_DIR/brain/label/lh.Schaefer2018_200Parcels_17Networks_order.annot
+--sval-annot /Users/aringuyen/Downloads/Parcellations/FreeSurfer5.3/fsaverage/label/lh.Schaefer2018_200Parcels_7Networks_order.annot \
+--tval $SUBJECTS_DIR/brain/label/lh.Schaefer2018_200Parcels_7Networks_order.annot
 ```
 
-### 8.3. Map the annotation files of the HCP MMP 1.0 atlas fromfsaverage to you subject for both hemispheres
+### 7.3. Map the annotation files of the HCP MMP 1.0 atlas fromfsaverage to you subject for both hemispheres
 
 ```console
 mri_surf2surf --hemi rh \                
 --srcsubject fsaverage \
 --trgsubject brain \
---sval-annot /Users/aringuyen/Downloads/Parcellations/FreeSurfer5.3/fsaverage/label/rh.Schaefer2018_200Parcels_17Networks_order.annot \
---tval $SUBJECTS_DIR/brain/label/rh.Schaefer2018_200Parcels_17Networks_order.annot
+--sval-annot /Users/aringuyen/Downloads/Parcellations/FreeSurfer5.3/fsaverage/label/rh.Schaefer2018_200Parcels_7Networks_order.annot \
+--tval $SUBJECTS_DIR/brain/label/rh.Schaefer2018_200Parcels_7Networks_order.annot
 ```
 
-### 8.4. Map the HCP MMP 1.0 annotations onto the volumetric image and add (FreeSurfer-specific) subcortical segmentation. Convert the resulting file to .mif format (use datatype uint32, which is liked best by MRtrix).
+### 7.4. Map the HCP MMP 1.0 annotations onto the volumetric image and add (FreeSurfer-specific) subcortical segmentation. Convert the resulting file to .mif format (use datatype uint32, which is liked best by MRtrix).
 
 ```console
-mri_aparc2aseg --old-ribbon --s brain --o schaefer2018_200.mgz --annot Schaefer2018_200Parcels_17Networks_order
+mri_aparc2aseg --old-ribbon --s brain --o schaefer2018_200.mgz --annot Schaefer2018_200Parcels_7Networks_order
 
 mrconvert –datatype uint32 schaefer2018_200.mgz schaefer2018_200.mif
 ```
 
-### 8.5. Replace the random integers of the hcpmmp1.mif file with integers
+### 7.5. Replace the random integers of the hcpmmp1.mif file with integers
 that start at 1 and increase by 1.
 
 ```console
@@ -217,9 +235,14 @@ labelconvert schaefer2018_200.mif $FREESURFER_HOME/FreeSurferColorLUT.txt /Users
 ```
 
 
-### 8.6. Register the ordered atlas-based volumetric parcellation to diffusion space.
+### 7.6. Register the ordered atlas-based volumetric parcellation to diffusion space.
 
 ```console
-mrtransform schaefer2018_200_parcels_nocoreg.mif -linear diff2struct_mrtrix.txt -inverse -datatype uint32 schaefer2018_200_parcels_coreg.mif
+cd sa # or st folder
 ```
 
+```console
+mrtransform ../schaefer2018_200_parcels_nocoreg.mif -linear diff2struct_mrtrix.txt -inverse -datatype uint32 schaefer2018_200_parcels_coreg.mif
+```
+
+Then go back to step 5.2
