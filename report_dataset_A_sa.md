@@ -2,6 +2,6 @@
 
 ## Results
 
-                                     |  
-:-----------------------------------:|:-------------------------:
-![](img/A_connectom_sa_heatmap.jpg)  |  ![](img/A_connectom_sa_matrix.jpg)
+-           |  -
+:--------------------:|:-------------------------:
+![](img/A_connectom_sa_heatmap.jpg)   |  ![](img/A_connectom_sa_matrix.jpg)
