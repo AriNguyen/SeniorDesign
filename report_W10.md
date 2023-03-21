@@ -140,10 +140,11 @@ mri_surf2surf --hemi rh \
 
 ```console
 mri_aparc2aseg --old-ribbon --s brain --o schaefer2018_200.mgz --annot Schaefer2018_200Parcels_7Networks_order
-
+```
 
 Convert the resulting file to .mif format (use datatype uint32, which is liked best by MRtrix).
 
+```console
 mrconvert –datatype uint32 schaefer2018_200.mgz schaefer2018_200.mif
 ```
 
