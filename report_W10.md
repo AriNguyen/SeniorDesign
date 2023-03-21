@@ -14,9 +14,9 @@ Pipeline Overview:
 - [5. Preparing a parcellation image for structural connectivity analysis](#5-preparing-a-parcellation-image-for-structural-connectivity-analysis)
     - [5.1 Convert the raw T1.mif image to nifti-format](#51-convert-the-raw-t1mif-image-to-nifti-format)
     - [5.2 Preprocess the T1 image in FreeSurfer](#52-preprocess-the-t1-image-in-freesurfer)
-    - [5.3. Map the annotation files of the HCP MMP 1.0 atlas from fsaverage to you subject for both hemispheres](#53-map-the-annotation-files-of-the-schaefer2018_200parcels_7networks-atlas-from-fsaverage-to-you-subject-for-both-hemispheres)
-    - [5.4 Map the HCP MMP 1.0 annotations onto the volumetric image and add subcortical segmentation. Convert the resulting file to .mif format](#54-map-the-schaefer2018_200parcels_7networks-annotations-onto-the-volumetric-image-and-add-freesurfer-specific-subcortical-segmentation)
-    - [5.5. Replace the random integers of the hcpmmp1.mif file with integers](#55-replace-the-random-integers-of-the-schaefer2018_200mif-file-with-integers-that-start-at-1-and-increase-by-1)
+    - [5.3. Map the annotation files of the Schaefer2018_200Parcels_7Networks atlas from fsaverage to you subject for both hemispheres](#53-map-the-annotation-files-of-the-schaefer2018_200parcels_7networks-atlas-from-fsaverage-to-you-subject-for-both-hemispheres)
+    - [5.4 Map the Schaefer2018_200Parcels_7Networks annotations onto the volumetric image and add (FreeSurfer-specific) subcortical segmentation.](#54-map-the-schaefer2018_200parcels_7networks-annotations-onto-the-volumetric-image-and-add-freesurfer-specific-subcortical-segmentation)
+    - [5.5. Replace the random integers of the schaefer2018_200.mif file with integers that start at 1 and increase by 1](#55-replace-the-random-integers-of-the-schaefer2018_200mif-file-with-integers-that-start-at-1-and-increase-by-1)
 
 ## 1. Preprocessing .nii to .mif file format 
 ```console
@@ -147,7 +147,7 @@ Convert the resulting file to .mif format (use datatype uint32, which is liked b
 mrconvert –datatype uint32 schaefer2018_200.mgz schaefer2018_200.mif
 ```
 
-### 5.5. Replace the random integers of the schaefer2018_200.mif file with integers that start at 1 and increase by 1.
+### 5.5. Replace the random integers of the schaefer2018_200.mif file with integers that start at 1 and increase by 1
 
 ```console
 labelconvert schaefer2018_200.mif Schaefer2018_200Parcels_7Networks_order_LUT.txt Schaefer2018_200Parcels_7Networks_order.txt schaefer2018_200_parcels_nocoreg.mif
