@@ -4,7 +4,19 @@ Pipeline Overview:
 
 - [1. Preprocessing .nii to .mif file format](#1-preprocessing-.nii-to-.mif-file-format)
 - [2. Fiber orientation distribution](#2-fiber-orientation-distribution)
+    - [2.1 Response function estimation](#21-response-function-estimation)
+    - [2.2. Estimation of Fiber Orientation Distributions (FOD)](#22-estimation-of-fiber-orientation-distributions-fod)
+    - [2.3. Intensity Normalization](#23-intensity-normalization)
 - [3. Creating a whole-brain tractogram](#3-creating-a-whole-brain-tractogram)
+    - [3.1. Preparing Anatomically Constrained Tractography (ACT)](#31-preparing-anatomically-constrained-tractography-act)
+    - [3.2 Preparing a mask of streamline seeding](#32-preparing-a-mask-of-streamline-seeding)
+- [4. Connectome construction](#4-connectome-construction)
+- [5. Preparing a parcellation image for structural connectivity analysis](#5-preparing-a-parcellation-image-for-structural-connectivity-analysis)
+    - [5.1 Convert the raw T1.mif image to nifti-format](#51-convert-the-raw-t1mif-image-to-nifti-format)
+    - [5.2 Preprocess the T1 image in FreeSurfer](#52-preprocess-the-t1-image-in-freesurfer)
+    - [5.3. Map the annotation files of the HCP MMP 1.0 atlas from fsaverage to you subject for both hemispheres](#53-map-the-annotation-files-of-the-schaefer2018_200parcels_7networks-atlas-from-fsaverage-to-you-subject-for-both-hemispheres)
+    - [5.4 Map the HCP MMP 1.0 annotations onto the volumetric image and add subcortical segmentation. Convert the resulting file to .mif format](#54-map-the-schaefer2018_200parcels_7networks-annotations-onto-the-volumetric-image-and-add-freesurfer-specific-subcortical-segmentation)
+    - [5.5. Replace the random integers of the hcpmmp1.mif file with integers](#55-replace-the-random-integers-of-the-schaefer2018_200mif-file-with-integers-that-start-at-1-and-increase-by-1)
 
 ## 1. Preprocessing .nii to .mif file format 
 ```console
@@ -55,7 +67,7 @@ mrtransform ../T1_raw.mif -linear diff2struct_mrtrix.txt -inverse T1_coreg.mif
 mrtransform schaefer2018_200_parcels_nocoreg.mif -linear diff2struct_mrtrix.txt -inverse -datatype uint32 schaefer2018_200_parcels_coreg.mif 
 ```
 
-#### 3.1.2 Preparing a mask of streamline seeding
+### 3.2 Preparing a mask of streamline seeding
 ```console
 5tt2gmwmi ../5tt_nocoreg.mif gmwmSeed_coreg.mif 
 ```
@@ -76,13 +88,13 @@ This command will take hours to finish.
 tcksift -act ../5tt_nocoreg.mif -term_number 1000000 tracks_10mio.tck wmfod_norm.mif sift_1mio.tck 
 ```
 
-## 5. Connectome construction
+## 4. Connectome construction
 
 ```console
 tck2connectome -symmetric -zero_diagonal -scale_invnodevol sift_1mio.tck schaefer2018_200_parcels_coreg.mif schaefer200.csv -out_assignment assignments_schaefer200.csv -force
 ```
 
-## 6. Preparing a parcellation image for structural connectivity analysis
+## 5. Preparing a parcellation image for structural connectivity analysis
 
 You need to install FreeSurfer
 
@@ -91,16 +103,20 @@ export FREESURFER_HOME=/Applications/freesurfer/7.3.2
 source $FREESURFER_HOME/SetUpFreeSurfer.sh
 ```
 
-### 6.1 Convert the raw T1.mif image to nifti-format
+### 5.1 Convert the raw T1.mif image to nifti-format
 ```console
 mrconvert T1_raw.mif T1_raw.nii.gz
 ```
 
-### 6.2 Preprocess the T1 image in FreeSurfer
+### 5.2 Preprocess the T1 image in FreeSurfer
 This commands take a few hours to run.
 ```console
 recon-all -s brain -i T1_raw.nii.gz -all
 ```
+
+### 5.3. Map the annotation files of the Schaefer2018_200Parcels_7Networks atlas from fsaverage to you subject for both hemispheres
+
+Left hemisphere:
 
 ```console
 mri_surf2surf --hemi lh \                
@@ -110,7 +126,7 @@ mri_surf2surf --hemi lh \
 --tval $SUBJECTS_DIR/brain/label/lh.Schaefer2018_200Parcels_7Networks_order.annot
 ```
 
-### 6.3. Map the annotation files of the HCP MMP 1.0 atlas fromfsaverage to you subject for both hemispheres
+Right hemisphere:
 
 ```console
 mri_surf2surf --hemi rh \                
@@ -120,16 +136,18 @@ mri_surf2surf --hemi rh \
 --tval $SUBJECTS_DIR/brain/label/rh.Schaefer2018_200Parcels_7Networks_order.annot
 ```
 
-### 6.4. Map the HCP MMP 1.0 annotations onto the volumetric image and add (FreeSurfer-specific) subcortical segmentation. Convert the resulting file to .mif format (use datatype uint32, which is liked best by MRtrix).
+### 5.4. Map the Schaefer2018_200Parcels_7Networks annotations onto the volumetric image and add (FreeSurfer-specific) subcortical segmentation. 
 
 ```console
 mri_aparc2aseg --old-ribbon --s brain --o schaefer2018_200.mgz --annot Schaefer2018_200Parcels_7Networks_order
 
+
+Convert the resulting file to .mif format (use datatype uint32, which is liked best by MRtrix).
+
 mrconvert –datatype uint32 schaefer2018_200.mgz schaefer2018_200.mif
 ```
 
-### 6.5. Replace the random integers of the hcpmmp1.mif file with integers
-that start at 1 and increase by 1.
+### 5.5. Replace the random integers of the schaefer2018_200.mif file with integers that start at 1 and increase by 1.
 
 ```console
 labelconvert schaefer2018_200.mif Schaefer2018_200Parcels_7Networks_order_LUT.txt Schaefer2018_200Parcels_7Networks_order.txt schaefer2018_200_parcels_nocoreg.mif
