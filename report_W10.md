@@ -2,7 +2,7 @@
 
 Pipeline Overview:
 
-- [1. Preprocessing .nii to .mif file format](#1-preprocessing-.nii-to-.mif-file-format)
+- [1. Preprocessing .nii to .mif file format](#1-preprocessing-nii-to-mif-file-format)
 - [2. Fiber orientation distribution](#2-fiber-orientation-distribution)
     - [2.1 Response function estimation](#21-response-function-estimation)
     - [2.2. Estimation of Fiber Orientation Distributions (FOD)](#22-estimation-of-fiber-orientation-distributions-fod)
