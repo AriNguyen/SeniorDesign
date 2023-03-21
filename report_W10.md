@@ -2,9 +2,9 @@
 
 Pipeline Overview:
 
-- [1. Preprocessing .nii to .mif file format](#1.-preprocessing-.nii-to-.mif-file-format)
-- [2. Fiber orientation distribution](#2.-fiber-orientation-distribution)
-- [3. Creating a whole-brain tractogram](#3.-creating-a-whole-brain-tractogram)
+- [1. Preprocessing .nii to .mif file format](#1-preprocessing-.nii-to-.mif-file-format)
+- [2. Fiber orientation distribution](#2-fiber-orientation-distribution)
+- [3. Creating a whole-brain tractogram](#3-creating-a-whole-brain-tractogram)
 
 ## 1. Preprocessing .nii to .mif file format 
 ```console
